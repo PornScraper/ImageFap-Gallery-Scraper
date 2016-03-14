@@ -6,7 +6,7 @@ import time
 import re
 from lib import pyperclip
 
-PARANOID_SLEEP = 6
+PARANOID_SLEEP = 2
 
 def zeroPad(num, maxnum):
     """Return the correct number or preceeding zeros to make the numbers sort cleanly in a filesystem
@@ -20,7 +20,7 @@ def zeroPad(num, maxnum):
     zeros = max_digits - num_digits
     for i in range(0, zeros):
         prefix = prefix + '0'
-    return prefix
+    return str(prefix) + str(num)
 
 
 def FetchPageText( pageurl ):
@@ -88,7 +88,7 @@ def GetGalleryIndex( ctx ):
         new_url = new_url.split('\"')[0]
         new_url = 'http://www.imagefap.com' + new_url
         new_url = new_url.replace('&amp;', '&')
-        print('url=[' + new_url +']') 
+        #print('url=[' + new_url +']') 
         fetch_ary.append(new_url);
         offset = idx + len(needle)
         idx = html.find(needle, offset)
@@ -112,7 +112,11 @@ def ExtractMetadata( ctx, html ):
         name = html[idx+len(needle):]
         name = name.split('?')[0]
         name = name.split('/')[1]
-        print("name = [" + name + "]\n")
+        name = urllib2.unquote(name)
+        bad_winchars = {'*':'', '.':'', '"':'', '/':'', '\\':'', '[':'(', ']':'(', ':':'', ';':'', '|':'-', '=':'-', ',':'', '!':''}
+        for o_char,n_char in bad_winchars.iteritems():
+            name = name.replace(o_char, n_char)
+        #print("name = [" + name + "]\n")
 
     # Uploader
     needle = '<b><font size="3" color="#CC0000">Uploaded by '
@@ -123,7 +127,7 @@ def ExtractMetadata( ctx, html ):
     else:
         uploader = html[idx+len(needle):]
         uploader = uploader.split('</font>')[0]
-        print("uploader = [" + uploader + "]\n")
+        #print("uploader = [" + uploader + "]\n")
 
     # Date
     ctx['download_date'] = time.strftime("%c")
