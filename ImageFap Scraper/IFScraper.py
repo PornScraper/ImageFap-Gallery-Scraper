@@ -6,7 +6,7 @@ import time
 import re
 from lib import pyperclip
 
-PARANOID_SLEEP = 2
+PARANOID_SLEEP = 1
 
 def zeroPad(num, maxnum):
     """Return the correct number or preceeding zeros to make the numbers sort cleanly in a filesystem
@@ -135,6 +135,19 @@ def ExtractMetadata( ctx, html ):
     ctx['gallery_uploader'] = uploader
     return ctx
 
+def EmitMetadata( ctx, dname ):
+    """Saves the context metadata about the gallery name/uploader/urls/etc to a log file beginning with three underscores"""
+    preamble = '<html><head><title>ImageFap Scrape Data</title></head>\n<body><pre>\n'
+    postamble = '\n</pre></body></html>\n'
+    fname = dname + '/___ImageFap_Scrape_Info.html'
+    print('Writing log to [' +fname+']')
+    f = open(fname, 'w')
+    f.write(preamble)
+    f.write( str(ctx) )
+    f.write(postamble)
+    f.close()
+    return
+
 def FetchAndSaveImages( ctx ):
     """
     Runs through the array ctx['image_preview_urls'] using each preview url to determine the full res image url. Then downloads and saves the full image.
@@ -143,7 +156,7 @@ def FetchAndSaveImages( ctx ):
     try:
         os.makedirs(foldername)
     except:
-        print "Error, make sure there is no directory with this script"
+        print("Error, make sure there is no directory with this script")
         return 0
     imgnum = 0
     imgcount = ctx['image_count']
@@ -153,12 +166,13 @@ def FetchAndSaveImages( ctx ):
         ctx['image_urls'].append(imgurl)
         orig_fname = imgurl[imgurl.rindex('/')+1:]
         imgname = foldername+'/'+zeroPad(imgnum,imgcount)+'__'+orig_fname
-        print('Preparing to write to [' +imgname+']')
+        print('Saving [' +imgname+']')
         f = open(imgname, 'wb')
         f.write(urllib2.urlopen(imgurl).read())
         f.close()
-        print '\t'+str(imgnum+1)+'/'+str(imgcount)+ ' completed\n'
+        print('\t'+str(imgnum+1)+'/'+str(imgcount)+ ' completed')
         imgnum += 1
+    EmitMetadata(ctx, foldername)
     return ctx
 
 def FindFullGalleryURL( a_url ):
@@ -217,19 +231,17 @@ def main():
         url = raw_input("\nEnter the url: ")
 
     ctx = FindFullGalleryURL( url );
-    print('fetching full gallery at [' + ctx['gallery_index_url'] + ']\n')    
+    print('Fetching full gallery index at [' + ctx['gallery_index_url'] + ']')    
     ctx = GetGalleryIndex( ctx )
 
     print("\n\nThere are "+str(ctx['image_count'])+" pics in the gallery: \""+ ctx['gallery_name']+"\".")
     contnum = 2
     contnum = raw_input("Would you like to download them all? 1=yes 2=no: ")
     if contnum == '1' or contnum == 'y':
-        #ctx = FetchAndSaveMetadata( ctx )
         print('\n')
         ctx = FetchAndSaveImages( ctx )
     else:
         print("Bailing out.\n")
         exit(0)
-
 
 main()
