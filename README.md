@@ -21,8 +21,7 @@ WHEN YOU HAVE PYTHON INSTALLED, FOLLOW THE INSTRUCTIONS BELOW.
 
 First find a gallery on ImageFap you would like to download.
 
-Then, navigate to the page that lets you cycle through the pictures,
-such as the page at http://www.imagefap.com/photo/2123766326/?pgid=&gid=4529707&page=0
+Then, navigate to the a page in the gallery you are interested in. 
 
 Copy the entire url.
 
